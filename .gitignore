@@ -1,0 +1,8 @@
+node_modules/
+npm-debug.log
+web/index.html
+web/pluckyui-*
+plugins/
+repositories/
+config/
+projects/
