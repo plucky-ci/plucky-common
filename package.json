@@ -1,6 +1,6 @@
 {
   "name": "plucky-common",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "common modules that can be used through plucky",
   "main": "index.js",
   "scripts": {
