@@ -4,7 +4,7 @@ let path = require('path');
 let yaml = require('js-yaml');
 let fs = require('fs');
 
-class Bitesize {
+class BitesizeEnvironment {
 	constructor(file) {
 		this.jsonYamlObj = yaml.safeLoad(fs.readFileSync(path.join(process.cwd(), file), 'utf8'));
 		this.file = file;
@@ -83,4 +83,4 @@ class Bitesize {
 	}
 }
 
-module.exports = Bitesize;
+module.exports = BitesizeEnvironment;
