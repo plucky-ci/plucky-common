@@ -7,12 +7,11 @@ let fs = require('fs');
 class BitesizeBuild {
 	constructor(file) {
 		this.jsonYamlObj = yaml.safeLoad(fs.readFileSync(path.join(process.cwd(), file), 'utf8'));
-    this.file = file;
+		this.file = file;
 	}
 
 	getComponent(matchComponent) {
 		// should only ever have 1 componment that matches
-    console.log(this.jsonYamlObj);
 		return this.jsonYamlObj.components.filter((compObj) => {
 			if (compObj.name === matchComponent) {
 				return compObj;
