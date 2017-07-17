@@ -1,0 +1,142 @@
+project: hed-console
+components:
+  - name: console-server
+    os: linux
+    dependencies:
+      - type: gem-package
+        package: fpm
+      - type: debian-package
+        package: rlwrap
+      - type: debian-package
+        package: build-essential
+      - type: debian-package
+        package: nodejs
+        version: 6.10.3-1nodesource1~trusty1
+        location: >-
+          https://deb.nodesource.com/node_6.x/pool/main/n/nodejs/nodejs_6.10.3-1nodesource1~trusty1_amd64.deb
+    repository:
+      git: 'ssh://git@bitbucket.pearson.com/occ/console-server.git'
+      branch: master
+    build:
+      - shell: rm -f ./startup.sh
+      - shell: >-
+          node ./tools/generatestartup.js --src startup.sh --dst startup.sh
+          --version 4.0.6 --console-ui-version "undefined"
+          --console-server-version "undefined" --mongo3x-version "undefined"
+          --consul-service-host "consul.kube-system.svc.cluster.local"
+          --consul-prefix "hed-console-${NODE_ENV}" --startup-command "node
+          /app/console-server/server.js --LOG.MODE=json
+          --WEB.WEB_ROOT=../console-ui/dist --WEB.PORT=80
+          --COMPOSITE.VERSION=4.0.6" --consul-master-token
+          bc0f2e29-84e3-42fe-9f50-03ef4cd29bc8 --consul-use-ssl false
+          --max-memory undefined
+      - shell: sudo chown `whoami` startup.sh
+      - shell: sudo chmod +x startup.sh
+      - shell: >-
+          ./build.sh --versions --package --configure-paas --complexity
+          --coverage --version 4.0.6
+      - shell: ls -al
+    artifacts:
+      - location: '*.deb'
+  - name: console-ui
+    os: linux
+    dependencies:
+      - type: gem-package
+        package: fpm
+      - type: debian-package
+        package: rlwrap
+      - type: debian-package
+        package: build-essential
+      - type: debian-package
+        package: nodejs
+        version: 6.10.3-1nodesource1~trusty1
+        location: >-
+          https://deb.nodesource.com/node_6.x/pool/main/n/nodejs/nodejs_6.10.3-1nodesource1~trusty1_amd64.deb
+    repository:
+      git: 'ssh://git@bitbucket.pearson.com/occ/console-ui.git'
+      branch: TeSt
+    build:
+      - shell: ./build.sh --versions --package --test
+    artifacts:
+      - location: '*.deb'
+  - name: mongo3x
+    version: 1.0.4
+    os: linux
+    dependencies:
+      - type: gem-package
+        package: fpm
+      - type: debian-package
+        package: rlwrap
+      - type: debian-package
+        package: build-essential
+    repository:
+      git: 'https://github.com/lv0/mongod_prov.git'
+      branch: master
+    build:
+      - shell: >-
+          fpm -s dir -t deb -n mongo3x -x "**/.git/**" -v 1.0.4 --prefix
+          /usr/local/bin .
+    artifacts:
+      - location: '*.deb'
+  - name: consul-ui
+    os: linux
+    dependencies:
+      - type: gem-package
+        package: fpm
+      - type: debian-package
+        package: rlwrap
+      - type: debian-package
+        package: build-essential
+      - type: debian-package
+        package: nodejs
+        version: 6.9.5-1nodesource1~trusty1
+        location: >-
+          https://deb.nodesource.com/node_6.x/pool/main/n/nodejs/nodejs_6.9.5-1nodesource1~trusty1_amd64.deb
+    repository:
+      git: 'ssh://git@bitbucket.pearson.com/occ/consul-ui.git'
+      branch: master
+    build:
+      - shell: printenv
+      - shell: mkdir -p config/
+      - shell: mkdir -p ~/.ssh/
+      - shell: >-
+          echo "-----BEGIN RSA PRIVATE
+          KEY-----\nMIIEogIBAAKCAQEAwWinukXw7UjKIvhHrWHsHCdO/NhTdsx4p7V5QzwfYXQYyra0\nnRjyW5K4PENViewRVkgLJ7W2jqCkO1VmB6WrPYuJfUgeUVqCezMJzrhOPcIePtHZ\nNXub8zh6ZH0QOX7wYRPFenawgHjOVlYBiuFmgTW60M5+5+9QFxgOqQtoBulUlGHp\nXAZkPuMe1ovBnpz4PLOQo/7kAW3Xe/0IxxxEVbpjWutY6YWGW+2tMfXtIR7hgVSa\niVwgJFgxwOagkx0cMSzBvf8PqhqVQBrnsftOta/YcrsvwYkwgJBrAhwJY975ZZOM\nIG89YRtQTrKSKJMARJFGoFeuZL+t8FlhpQXqHwIDAQABAoIBAAmPyvsCii6w8o1Y\nCPMhbDLYHqeRak7tPOnNpvkT99kxjCg5cCR0H0c3sbQJACmZaiIB3ctQyH20o2nr\nhufJ4PVh+KIg9p6/AsRkeY+mvPeAqU4hwcNLISKdIC/nnu24wNmLyK+NPpybXFgY\nWGstSYwJw/qeutdslWEO52qkDbiJqoZm50Fl6A+XfxTq0jKhU9BSFGuCbaFI86Ro\nBme3TAOWyvqvvMGJvnd3QA5hzOMuR0j/0+cFWVqYK51rcyZzvVfduPapbnjVdp4F\ns9Xdp39YzD/c3du6F7ur3SIhXJBxXFffVTRLnT24ifZnGcUSZbwsBTZQJAB9jTua\n5VuimEECgYEA6QW5LyDsMvNHlyxF0IfjGnkS42a3GypY+GRFGpEAIUb/jrArK89C\n6Em6tnX+x2o5NeCcD3X41EoKKl1b6N84UxUWyNSq1UA45tRa9eSNSNXCeK9cUS1o\nD3LdKtWHo90SOaMo3ISce4YwOlhSElrn3Lmcz/DcB6e9XItCRprmtfUCgYEA1Hrz\ngA3QwPq73y2Zct7SpBzrhZuN24J+CuqMucSDgaTykYwx/32eRXtO0F0BAKi9p0Kb\ntiZAgFJIe0DZr1XMd0i4/P1d76WeuOQjq1uIx4isnagaJpdLNNNDTj0iFwD1dRMI\n8Q9uw6VdhUugU9vgpTxvnQ8jm0+IgLX9HQ1JP0MCgYBSwoGex2acQeMvQb4Z7eku\nwcl/kj9+GnA26AXTBaSyLPEe0FrE2Hu+3FC/9PBkCsn+5KMIqrGRVCqAGWBHOOBc\nQaUx9rYlvwV2lf0oT+AN+j1zd3SmMCZBNl5ulB/0htOuPNCKYV7iUCpYzn13n2mx\n7wpOoBDFd0G92IfVY7aE8QKBgBVvDa8mNZ+x60+5Ftial58Md8mzhlzVTgel32pB\n444paHq8LLL8JgIWTT4Bk79QRklgE7sNIsaPBlbAlPT177k8scR7foVVLKyz/tEj\nW6ndJKSGt5SbAHAku45h5lVxuFEGCYnfp6m+va9bkKHE9WVVsmCijVH2dOue8BiF\nJZVnAoGAfCi3+lMGx+Yuk8/nHQv9cPZtn+38/os8l3yR/78ZxIi6eiNssADnk4N7\neTx9pRbmAQ/BLu1J+2fmCuZWLEg5t/F9jnUZrZYHJXeLyLTBUpvlnFJK1ZuHolpZ\n1P5xxM6geKpiBN2h86hqFDYaaqovpC8ySp/a3SKnOFZGhgUZCms=\n-----END
+          RSA PRIVATE KEY-----\n">$HOME/.ssh/id_rsa
+      - shell: cat $HOME/.ssh/id_rsa
+      - shell: chmod 0600 $HOME/.ssh/id_rsa
+      - shell: >-
+          git clone
+          ssh://git@bitbucket.pearson.com/occ/consul-ui-console-config.git
+          appcfg
+      - shell: rm -f $HOME/.ssh/id_rsa
+      - shell: cp appcfg/config.js config/config.js
+      - shell: rm -rf appcfg
+      - shell: >-
+          rm -f
+          /var/jenkins_home/repository/public/pool/main/c/consul-ui/consul-ui_*_amd64.deb
+      - shell: ./build.sh
+    artifacts:
+      - location: '*.deb'
+  - name: node6.9.5
+    version: 6.9.5
+    repository:
+      git: 'https://github.com/nodejs/node.git'
+      branch: v6.x
+    build:
+      - shell: >-
+          wget
+          https://deb.nodesource.com/node_6.x/pool/main/n/nodejs/nodejs_6.9.5-1nodesource1~trusty1_amd64.deb
+    artifacts:
+      - location: '*.deb'
+  - name: node6.10.3
+    version: 6.10.3
+    repository:
+      git: 'https://github.com/nodejs/node.git'
+      branch: v6.x
+    build:
+      - shell: >-
+          wget
+          https://deb.nodesource.com/node_6.x/pool/main/n/nodejs/nodejs_6.10.3-1nodesource1~trusty1_amd64.deb
+    artifacts:
+      - location: '*.deb'

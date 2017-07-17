@@ -3,12 +3,17 @@
   "version": "0.0.3",
   "description": "common modules that can be used through plucky",
   "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "lab"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nodegit": "^0.16.0"
+    "nodegit": "^0.16.0",
+    "code": "^4.0.0",
+    "lab": "^11.1.0"
   }
 }
