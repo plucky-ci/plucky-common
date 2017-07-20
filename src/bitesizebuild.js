@@ -10,6 +10,15 @@ class BitesizeBuild {
 		this.file = file;
 	}
 
+	getShellCommand(source, matchCommand) {
+		// should only ever have 1 componment that matches
+		return source.build.filter((compObj) => {
+			if (compObj.shell.indexOf(matchCommand) !== -1 ) {
+				return compObj;
+			}
+		})[0];
+	}
+
 	getComponent(matchComponent) {
 		// should only ever have 1 componment that matches
 		return this.jsonYamlObj.components.filter((compObj) => {
@@ -19,12 +28,20 @@ class BitesizeBuild {
 		})[0];
 	}
 
-	setBranchName(targetComponent, targetBranchName) {
+	setBranchName(targetComponent, targetBranchName, version) {
     const component = this.getComponent(targetComponent);
 
     if (component && component.repository) {
       component.repository.branch = targetBranchName;
-    }
+		}
+		
+		let shellCommand = this.getShellCommand(component, './build.sh ');
+		const shellCommandParts = shellCommand.shell.split(' ');
+		if (shellCommandParts[shellCommandParts.size - 1] !== '--branch') {
+			shellCommandParts.pop();
+		}
+		shellCommandParts.push(version);
+		shellCommand.shell = shellCommandParts.join(' ');
 
 		const yamlString = yaml.safeDump(this.jsonYamlObj);
 
