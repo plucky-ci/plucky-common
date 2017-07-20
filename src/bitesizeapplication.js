@@ -32,6 +32,25 @@ class BitesizeApplication {
 		}
 	}
 
+	setApplicationVersion(application, version) {
+		const appIdx = this.jsonYamlObj.applications.findIndex((app, idx) => {
+			return app.name === application;
+		});
+
+		const app = this.jsonYamlObj.applications[appIdx];
+
+		app.version = version;
+
+		const yamlString = yaml.safeDump(this.jsonYamlObj);
+
+		try {
+			fs.writeFileSync(this.file, yamlString);
+			return app;
+		} catch(e) {
+			throw e;
+		}
+	}
+
 }
 
 module.exports = BitesizeApplication;
